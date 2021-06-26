@@ -1,11 +1,14 @@
 let cotizacionDolar = 42.5;
 let valorEnDolares;
+let nombre;
+let documento;
+let correo;
 let usuario;
 
 class Usuario {
-  constructor(nombre, cedula, correo) {
+  constructor(nombre, documento, correo) {
     this.nombre = nombre;
-    this.cedula = cedula;
+    this.documento = documento;
     this.correo = correo;
     this.conversiones = [];
   }
@@ -15,43 +18,38 @@ class Usuario {
   }
 }
 
-function inicializar() {
-  crearUsuario();
-  cambioDolaresPesos();
-}
-
-function crearUsuario() {
-  nombre = prompt("Ingrese su nombre");
-  cedula = prompt("Ingrese su cedula");
-  correo = prompt("Ingrese su correo");
-  usuario = new Usuario(nombre, cedula, correo);
-}
-
+// tomo los datos y llamo a la funcion de covertir
 function cambioDolaresPesos() {
-  valorEnDolares = prompt(
-    "Ingrese el valor que quiere convertir de Dólares a Pesos Uruguayos"
-  );
+  nombre = document.getElementById('nombre').value;
+  documento = document.getElementById('documento').value;
+  correo = document.getElementById('correo').value;
+  valorEnDolares = document.getElementById('monto_usd').value;
+  usuario = new Usuario(nombre, documento, correo);
   convertir(valorEnDolares, cotizacionDolar);
 }
 
+// realizo la conversion, la agrego a la propiedad 'conversiones' del objeto usuario y agrego al historial en el DOM
 function convertir(valorEnDolares, cotizacionDolar) {
-  if (isNaN(valorEnDolares)) {
-    alert("Debe ingresar un número");
-    cambioDolaresPesos();
-  } else {
-    let resultado = valorEnDolares * cotizacionDolar;
-    usuario.agregarConversion(resultado);
-    alert(valorEnDolares + " dólares son: $" + resultado + " (pesos Uruguayos)\n");
-    if (confirm('Quiere realizar otra conversión?')) {
-      cambioDolaresPesos();
-    } else {
-      alert("Hola, " + usuario.nombre + "!\n"
-        + "Su cédula es: " + usuario.cedula + "\n"
-        + "Su correo es: " + usuario.correo + "\n\n"
-        + "Historial de Conversiones:\n" + usuario.conversiones.map(x => "$" + x).join("\n"))
-    }
-  }
+  let resultado = valorEnDolares * cotizacionDolar;
+  usuario.agregarConversion(resultado);
+  var li_conversion = document.createElement("li");
+  li_conversion.innerText = 'USD ' + valorEnDolares + ' son $UY ' + resultado;
+  document.getElementById('historial_conversiones').appendChild(li_conversion);
+  document.getElementById('monto_usd').value = "";
 }
 
-inicializar();
+// para chequear si el DOM ya esta cargado
+function documentoListo(fn) {
+  if (document.readyState === "complete" || document.readyState === "interactive") {
+      setTimeout(fn, 1);
+  } else {
+      document.addEventListener("DOMContentLoaded", fn);
+  }
+}    
 
+documentoListo(function() {
+  // si el DOM esta cargado, escuchamos el evento click al boton con el ID 'convertir'
+  document.getElementById('convertir').addEventListener('click', function(){
+    cambioDolaresPesos();
+  });
+});
